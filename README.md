@@ -20,5 +20,5 @@ The goals of this project are to achive the following:
 If a content type is not available for a specfic representation, the proper code is:
 
 ```
-500 - Unsupported Content Type
+500 - Unsupported Content-Type: {content-type}; supported ones are: {Supported content-types}
 ```
