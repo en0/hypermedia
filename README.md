@@ -25,4 +25,5 @@ If a content type is not available for a specfic representation, the proper code
 
 ## Refrences ##
 [JsonHAL](http://stateless.co/hal_specification.html)
+
 [Haltalk](http://haltalk.herokuapp.com/explorer/browser.html#/)
