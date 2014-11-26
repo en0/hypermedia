@@ -22,3 +22,7 @@ If a content type is not available for a specfic representation, the proper code
 ```
 500 - Unsupported Content-Type: {content-type}; supported ones are: {Supported content-types}
 ```
+
+## Refrences ##
+(JsonHAL)[http://stateless.co/hal_specification.html]
+(Haltalk)[http://haltalk.herokuapp.com/explorer/browser.html#/]
