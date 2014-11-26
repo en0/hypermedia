@@ -174,7 +174,7 @@ UserBase = HypermediaFactory(
     class_name="UserBase",
     resource_format="/user/{userid}",
     doc_key="usr",
-    doc_uri="http://docs.skytrace.com/api/usr",
+    doc_uri="http://docs.example.com/api/usr",
     public_fields=['name','email'],
     private_fields=['userid']
 )
@@ -183,7 +183,7 @@ PostBase = HypermediaFactory(
     class_name="PostBase",
     resource_format="/post/{postid}",
     doc_key='pst',
-    doc_uri='http://docs.skytrace.com/api/pst',
+    doc_uri='http://docs.example.com/api/pst',
     public_fields=['title', 'body'],
     private_fields=['postid']
 )
@@ -231,14 +231,14 @@ def app(env, start_response):
 
 if __name__ == "__main__":
     u1 = User(
-        'Ian Laird',
-        'ian@skytrace.com',
+        'Darrell Huff',
+        'dh@email.com',
         '1234'
     )
 
     u2 = User(
-        'Bill Taylor',
-        'bill@skytrace.com',
+        'Irving Geis',
+        'ig@email.com',
         '1235'
     )
 
