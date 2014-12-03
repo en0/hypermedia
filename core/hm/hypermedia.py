@@ -1,6 +1,53 @@
 class Hypermedia(object):
+    """ This class enforces the hypermedia format.
+
+    If you want to extend this class, can inherit from it.
+    To use this class or to use a class extended from this class, Use the
+    HypermediaFactory and create your representation from it.
+
+    Example:
+
+    class UserBase(Hypermedia, Resource):
+        def get(self, userid):
+            self.load(userid)
+            return self
+
+
+    UserBaseV1 = HypermediaFactory(
+        base=UserBase,
+        class_name="UserBase",
+        resource_format="/v1.0/user/{userid}",
+        resource_route="/v1.0/user/<string:userid>",
+        doc_key="usr",
+        doc_uri="http://docs.example.com/api/usr",
+        public_fields=['name','email'],
+        private_fields=['userid']
+    )
+
+
+    class UserV1(UserBaseV1):
+        def load(self, userid):
+            ...
+
+        @property
+        def name(self):
+            return self._name
+
+        @property
+        def email(self):
+            return self._email
+
+        @property
+        def userid(self):
+            return self._userid
+    
+    """
+        
 
     def add_rel(self, label, rel, embedded=False, **kwargs):
+
+        if not hasattr(self, "__rels__"): setattr(self, "__rels__", {})
+
         self.__rels__[label] = {
             'as_collection' : False,
             'base_class' : type(rel),
@@ -12,6 +59,9 @@ class Hypermedia(object):
         }
 
     def add_rel_collection(self, label, rel, embedded=False, **kwargs):
+
+        if not hasattr(self, "__rels__"): setattr(self, "__rels__", {})
+
         _collection_ = self.__rels__.get(label, {
             'as_collection' : True,
             'base_class' : type(rel),
@@ -31,7 +81,9 @@ class Hypermedia(object):
             self.__rels__[label] = _collection_
 
 
-    def __render__(self, with_curies=True):
+    def render(self, with_curies=True):
+
+        if not hasattr(self, "__rels__"): setattr(self, "__rels__", {})
 
         curies = [{ 'name' : self.__doc_key__, 'href' : self.__doc_uri__ }]
         _seen_curies = set([self.__doc_key__])
@@ -53,7 +105,7 @@ class Hypermedia(object):
             return _link
 
         def __render_embedded__(ref):
-            return ref['rel'].__render__(with_curies)
+            return ref['rel'].render(with_curies)
 
         def __format_rel__(ref, label, renderer):
             doc_key = ref['base_class'].__doc_key__
@@ -134,6 +186,7 @@ class Hypermedia(object):
         return "<{0}({1})>".format(self.__cname__, ", ".join(fl)).format(**d)
 
 
+
 def HypermediaFactory(class_name, base=Hypermedia, **kwargs):
     """ Create a new class type for a hypermedia object
 
@@ -148,6 +201,8 @@ def HypermediaFactory(class_name, base=Hypermedia, **kwargs):
         resource_format - The format used to render the URI of the Hypermedia object.
                         - The format can refrence the name of a public or private field as if
                         - it is passed in a format command. ie: "/api/user/{userid}"
+        resource_route  - The string used to identity the route to whatever services engine that is being used.
+                        - ie: Flask or Bottle. A value such as "/resource/<string:id>"
         doc_key         - The key prefixed used when other classes refrence this as a link or embeded
         doc_uri         - The location of the documentation for this object.
         public_fields   - A list of names representing the public fields exposed as properties on this class.
@@ -159,11 +214,12 @@ def HypermediaFactory(class_name, base=Hypermedia, **kwargs):
         
     return type(class_name+"Class", (base,), {
         '__resource_format__' : kwargs['resource_format'],
+        '__resource_route__' : kwargs['resource_route'],
         '__doc_key__' : kwargs['doc_key'],
         '__doc_uri__' : kwargs['doc_uri'],
         '__pfields__' : kwargs['public_fields'],
         '__sfields__' : kwargs['private_fields'],
         '__cname__': class_name,
-        '__rels__' : {},
+        #'__rels__' : {},
     });
 
