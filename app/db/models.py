@@ -9,6 +9,9 @@ class User(Base):
     userid = Column(Integer, Sequence('user_id_seq'), primary_key=True)
     name = Column(String(50))
     email = Column(String(255))
+    password = Column(String(255))
+    salt = Column(String(255))
+    key = Column(String(255))
     posts = relationship("Post", backref='author')
 
     def __repr__(self):

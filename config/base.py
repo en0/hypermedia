@@ -1,5 +1,8 @@
 class ConfigBase(object):
 
+    ## If true, the application will generate the database schema
+    CREATE_SCHEMA = False
+
     ## Database Connection Schema for SQL ALCHEMY
     DATABASE_URI = 'sqlite:///:memory:'
 

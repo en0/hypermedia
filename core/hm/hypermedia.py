@@ -43,10 +43,10 @@ class Hypermedia(object):
     
     """
         
+    def __init__(self):
+        self.__rels__ = {}
 
     def add_rel(self, label, rel, embedded=False, **kwargs):
-
-        if not hasattr(self, "__rels__"): setattr(self, "__rels__", {})
 
         self.__rels__[label] = {
             'as_collection' : False,
@@ -59,8 +59,6 @@ class Hypermedia(object):
         }
 
     def add_rel_collection(self, label, rel, embedded=False, **kwargs):
-
-        if not hasattr(self, "__rels__"): setattr(self, "__rels__", {})
 
         _collection_ = self.__rels__.get(label, {
             'as_collection' : True,
@@ -80,10 +78,24 @@ class Hypermedia(object):
             })
             self.__rels__[label] = _collection_
 
+    def render_collection(self, rel_label):
+        ref = self.__rels__.get(rel_label, {'link':[]})
+        ret = []
+
+        for l in ref['link']:
+            if ref['as_embedded']:
+                ret.append(l['rel'].render())
+            else:
+                r = l['rel'].render()
+                o = dict([(_k,_v) for _k, _v in r.items() if _k in ['_links', '_embedded']])
+                for k,v in l['kwargs'].items():
+                    d = l['rel'].get_field_values()
+                    o[k] = v.format(**d)
+                ret.append(o)
+        return ret
+
 
     def render(self, with_curies=True):
-
-        if not hasattr(self, "__rels__"): setattr(self, "__rels__", {})
 
         curies = [{ 'name' : self.__doc_key__, 'href' : self.__doc_uri__ }]
         _seen_curies = set([self.__doc_key__])
@@ -220,6 +232,5 @@ def HypermediaFactory(class_name, base=Hypermedia, **kwargs):
         '__pfields__' : kwargs['public_fields'],
         '__sfields__' : kwargs['private_fields'],
         '__cname__': class_name,
-        #'__rels__' : {},
     });
 
