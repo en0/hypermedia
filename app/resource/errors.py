@@ -4,3 +4,9 @@ class NotFoundException(Exception):
 class NotAuthorizedException(Exception):
     pass
 
+class MethodNotAllowedException(Exception):
+    pass
+
+class ForbiddenException(Exception):
+    pass
+

@@ -16,14 +16,16 @@ PostBaseV1 = HypermediaFactory(
     class_name="PostBase",
     resource_format="/v1.0/post/{postid}",
     resource_route=[ "/v1.0/post/<int:postid>", "/v1.0/post/" ],
-    doc_key='pst',
-    doc_uri='http://docs.example.com/api/pst',
+    doc_key='v1.0-post',
+    doc_uri="/docs/v1.0-post",
     public_fields=['title', 'body'],
     private_fields=['postid']
 )
 
-@register('PostV1')
+@register('v1.0-post')
 class PostV1(PostBaseV1):
+    """ Represents a Blog post entry. """
+
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument('title', type=str, location = 'json')

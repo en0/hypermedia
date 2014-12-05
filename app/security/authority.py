@@ -1,5 +1,3 @@
-from os import urandom
-from hashlib import sha1
 from app.db import models
 from flask import g
 
@@ -13,42 +11,24 @@ class Authority(object):
         return record
 
     def authenticate_with_key(self, email, key):
-
         record = self._get_record_by_email(email)
+        ## For debugging:
         if not record: return
-        kyhash = self.hash_key(record.password, record.key, record.salt)
-        if not key == kyhash: return
+        self.show_auth_token(record)
+        if not key == record.api_key: return
         self._authenticated = True
         self._record = record
 
     def authenticate_with_password(self, email, password):
-
         record = self._get_record_by_email(email)
         if not record: return
-        pwhash = self.hash_password(password, record.salt)
-        if not pwhash == record.password: return
+        if not record.check_password(password): return
         self._authenticated = True
         self._record = record
 
-    def hash_password(self, password, salt=None):
-        if not salt: salt = urandom(16).encode('base_64')
-        crypto = sha1()
-        crypto.update(salt)
-        crypto.update(password)
-        return crypto.hexdigest()
-
-    def pack_key(self):
-        if not self._authenticated: return None
-        kyhash = self.hash_key(self._record.password, self._record.key, self._record.salt)
-        token = "{0}:{1}".format(self._record.email, kyhash)
-        return token.encode('base_64')
-
-    def hash_key(self, password_hash, key, salt):
-        crypto = sha1()
-        crypto.update(salt)
-        crypto.update(password_hash)
-        crypto.update(key)
-        return crypto.hexdigest()
+    def is_in_role(self, role):
+        if not self._authenticated: return False
+        return self._record.is_in_role(role)
         
     @property
     def authenticated(self):
@@ -57,4 +37,13 @@ class Authority(object):
     @property
     def user(self):
         return self._record
+
+    @property
+    def authority_token(self):
+        if self.authenticated:
+            return ":".join([self._record.email, self._record.api_key]).encode('base64').rstrip('\n')
+
+    def show_auth_token(self, record):
+        token = ":".join([record.email, record.api_key]).encode('base64')
+        print('Your API Key is:', token)
 

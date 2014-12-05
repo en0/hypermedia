@@ -195,6 +195,8 @@ class Hypermedia(object):
 
         for field in self.get_fields(): fl.append(field+"='{"+field+"}'")
         d = self.get_field_values()
+        print(d)
+        return ""
         return "<{0}({1})>".format(self.__cname__, ", ".join(fl)).format(**d)
 
 

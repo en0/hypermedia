@@ -1,6 +1,6 @@
 from core.registrar import key as register, fns as representations
 from app.resource import UserBase
-from app.resource.errors import NotFoundException, NotAuthorizedException
+from app.resource.errors import NotFoundException, NotAuthorizedException, ForbiddenException
 from core.hm import HypermediaFactory
 
 ## Import other representations
@@ -16,19 +16,20 @@ UserBaseV1 = HypermediaFactory(
     class_name="UserBase",
     resource_format="/v1.0/user/{userid}",
     resource_route=[ "/v1.0/user/<int:userid>", "/v1.0/user/" ],
-    doc_key="usr",
-    doc_uri="http://docs.example.com/api/usr",
+    doc_key="v1.0-user",
+    doc_uri="/docs/v1.0-user",
     public_fields=['name','email'],
     private_fields=['userid']
 )
 
 
-@register('UserV1')
+@register('v1.0-user')
 class UserV1(UserBaseV1):
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument('name', type=str, location = 'json')
         self.reqparse.add_argument('email', type=str, location = 'json')
+        self.reqparse.add_argument('password', type=str, location = 'json')
         super(UserV1, self).__init__()
         self._n = None
         self._e = None
@@ -55,9 +56,27 @@ class UserV1(UserBaseV1):
         self._n = self.db_ref.name = _update.name if _update.name else self.db_ref.name
         self._e = self.db_ref.email = _update.email if _update.email else self.db_ref.email
         g.db.commit()
-        
 
-    def load(self, entity, depth=1):
+
+    def remove_from_db(self, userid):
+        u = g.db.query(models.User).filter(models.User.userid == userid).first()
+        self.db_ref = u
+        if not u: raise NotFoundException()
+        if u == g.authority.user: raise ForbiddenException()
+        g.db.delete(u)
+        g.db.commit()
+
+
+    def create_from_request(self):
+        _data = self.reqparse.parse_args()
+        self.db_ref = models.User(**_data)
+        g.db.add(self.db_ref)
+        g.db.commit()
+        self.load()
+
+
+    def load(self, entity=None, depth=1):
+        if entity == None: entity = self.db_ref
         self._n = entity.name
         self._e = entity.email
         self._i = entity.userid

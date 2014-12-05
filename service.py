@@ -8,6 +8,7 @@ import app.representation as rep
 ## Flask
 from flask import Flask, request, g, abort
 from flask.ext.restful import Api
+from flask.views import View
 
 ## Sql Alchemy
 from sqlalchemy import create_engine
@@ -51,7 +52,7 @@ def before_request():
 
 @app.teardown_request
 def after_request(x):
-    if g.db: 
+    if hasattr(g, 'db') and g.db: 
         g.db.close()
 
 
@@ -60,7 +61,6 @@ for label, resource, route in rep.next():
     print('Loading: {0} - {1}'.format(label, route))
     if type(route) == str: route = [route]
     api.add_resource(resource, *route)
-
 
 ## If running on the command line, Execute Listener
 if __name__ == "__main__":
