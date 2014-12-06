@@ -25,6 +25,7 @@ class ResourceBase(Hypermedia, Resource):
         except MethodNotAllowedException:
             abort(405)
 
+
     @staticmethod
     def authority_required(layer, **params):
         def _authentication(fn):
@@ -54,6 +55,7 @@ class ResourceBase(Hypermedia, Resource):
 
         return layers[layer]
 
+
     @staticmethod
     def get_etag(body):
         """ Computes the etag for the data that is sent.
@@ -66,7 +68,7 @@ class ResourceBase(Hypermedia, Resource):
         Returns:
             etag computed from the body
         """
-        return sha1(json.dumps(body)).hexdigest()
+        return sha1(json.dumps(body).encode('utf-8')).hexdigest()
 
 
     @staticmethod
@@ -101,16 +103,12 @@ class ResourceBase(Hypermedia, Resource):
 
         Upstream function must except a key word argument for `ifmatch`
         """
-
-
         @wraps(fn)
         def _wrapper(*args, **kwargs):
 
             def __ifmatch(data):
                 if 'If-Match' in request.headers:
-                    print('hit')
                     etag = ResourceBase.get_etag(data)
-                    print(etag, request.headers['If-Match'], etag==request.headers['If-Match'])
                     return etag == request.headers['If-Match']
                 return True
             
@@ -118,5 +116,4 @@ class ResourceBase(Hypermedia, Resource):
             return fn(*args, **kwargs)
 
         return _wrapper
-
 

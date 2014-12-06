@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, Sequence, Text, ForeignKey, Table
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, backref
+from base64 import b64encode
 
 from hashlib import sha1
 from os import urandom
@@ -42,8 +43,10 @@ class User(Base):
     def __init__(self, name, email, password):
         self.name = name
         self.email = email
-        self.salt = urandom(16).encode('base64')
-        self.key = urandom(32).encode('base64')
+        self.salt = b64encode(urandom(16))
+        #self.salt = urandom(16).encode('base64')
+        self.key = b64encode(urandom(16))
+        #self.key = urandom(16).encode('base64')
         self.set_password(password)
 
     def set_password(self, password):
@@ -56,14 +59,14 @@ class User(Base):
     def hash_password(password, salt):
         _crypt = sha1()
         _crypt.update(salt)
-        _crypt.update(password)
+        _crypt.update(password.encode('utf-8'))
         return _crypt.hexdigest()
 
     @property
     def api_key(self):
         crypto = sha1()
         crypto.update(self.salt)
-        crypto.update(self.password)
+        crypto.update(self.password.encode('utf-8'))
         crypto.update(self.key)
         return crypto.hexdigest()
 

@@ -1,5 +1,6 @@
 from app.db import models
 from flask import g
+from base64 import b64encode
 
 class Authority(object):
     def __init__(self):
@@ -41,9 +42,10 @@ class Authority(object):
     @property
     def authority_token(self):
         if self.authenticated:
-            return ":".join([self._record.email, self._record.api_key]).encode('base64').rstrip('\n')
+            token = ":".join([self._record.email, self._record.api_key])
+            return b64encode(token.encode('utf-8')).decode('utf-8')
 
     def show_auth_token(self, record):
-        token = ":".join([record.email, record.api_key]).encode('base64')
-        print('Your API Key is:', token)
+        token = ":".join([record.email, record.api_key])
+        print('Your API Key is:', b64encode(token.encode('utf-8')))
 
