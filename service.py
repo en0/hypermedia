@@ -26,6 +26,7 @@ app = Flask(__name__)
 app.config.from_object(Config)
 api = Api(app)
 
+print(app.root_path)
 
 @app.before_first_request
 def before_frist_request():

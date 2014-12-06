@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>APIDOC - {{ref['key']}}</title>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css">
+    </head>
+    <body style='background-color: #efefef;'>
+        <div class='container'>
+            <h1>API Documentation - {{ref['key']}}</h1>
+            <p class='lead'>{{ref['description']}}</p>
+            <p>Route: {{ref['route']}}</p>
+            <div class='methods'>
+                {% for method, desc in ref['methods'].items() %}
+                <div class='panel panel-default'>
+                    <div class='panel-heading text-uppercase lead'>{{method}}</div>
+                    <pre class='panel-body' style='border: none; background-color: inherit;'>{{desc}}</pre>
+                </div>
+                <hr/>
+                {% endfor %}
+            </div>
+            <h3>See Also</h3>
+            {% for key, desc in ref['_links'].items() %}
+                <dl>
+                    <dt><a href="/docs/{{key}}">{{key}}</a></dt>
+                    <dd>{{desc}}</dd>
+                </dl>
+            {% endfor %}
+        </div>
+    </body>
+</html>
+
