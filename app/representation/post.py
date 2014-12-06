@@ -179,6 +179,7 @@ class PostV1(PostBaseV1):
     methods = [ 'GET', 'PUT', 'POST', 'DELETE' ]
 
 
+    @ResourceBase.ifnonematch
     def get(self, postid=None):
         """ This method will return the state of one or more post representations.
 
@@ -245,7 +246,8 @@ class PostV1(PostBaseV1):
             return self.render()
 
     @ResourceBase.authority_required('authentication')
-    def put(self, postid=None):
+    @ResourceBase.ifmatch
+    def put(self, postid=None, ifmatch=None):
         """ This method will create or update a specific post
 
             PUT can be used to update a specific URI OR to create a specific URI.
@@ -272,6 +274,11 @@ class PostV1(PostBaseV1):
         if not postid: raise NotFoundException()
         try:
             self.load_from_db(postid)
+
+            _current_data = self.render()
+            if not ifmatch(_current_data):
+                return None, 412, { 'Location' : self.__uri__ }
+
             self.update_from_request()
         except NotFoundException:
             self.create_from_request(postid)
@@ -322,7 +329,8 @@ class PostV1(PostBaseV1):
 
 
     @ResourceBase.authority_required('authentication')
-    def delete(self, postid):
+    @ResourceBase.ifmatch
+    def delete(self, postid, ifmatch=None):
         """ This method will remove the specified blog post from the system.
 
             Arguments:
@@ -337,7 +345,11 @@ class PostV1(PostBaseV1):
                 204 (No Content) on success.
 
         """
-        if not postid: raise NotFoundException()
+        self.load_from_db(postid)
+
+        _current_data = self.render()
+        if not ifmatch(_current_data):
+            return None, 412, { 'Location' : self.__uri__ }
+
         self.remove_from_db(postid)
         return None, 204
-

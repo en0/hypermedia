@@ -38,6 +38,7 @@ def before_frist_request():
 
 @app.before_request
 def before_request():
+    g.debug = Config.DEBUG
     g.db = Config.DbSession()
     g.authority = Authority()
     if request.authorization:
